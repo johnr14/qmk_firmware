@@ -273,7 +273,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // Let QMK process the KC_BSPC keycode as usual outside of shift
         return true;
         }
-/*
+
+        /*
+         *  Catch MACRO commands without having them on a seperate layer
+         */
+
+        /*
         case FN_DM_REC1:
         {
         // Initialize a boolean variable that keeps track
@@ -303,7 +308,40 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         }
         // Let QMK process the KC_BSPC keycode as usual outside of shift
         return true;
-        }*/
+        }
+
+        case FN_DM_PLY1:
+        {
+        // Initialize a boolean variable that keeps track
+        // of the delete key status: registered or not?
+        //static bool delkey_registered;
+        if (record->event.pressed) {
+            // Detect the activation of either shift keys
+            if (mod_state & MOD_MASK_CRTL) {
+                // First temporarily canceling both shifts so that
+                // shift isn't applied to the KC_DEL keycode
+                del_mods(MOD_MASK_CTRL);
+                register_code(DM_REC1);
+                // Update the boolean variable to reflect the status of KC_DEL
+                delkey_registered = true;
+                // Reapplying modifier state so that the held shift key(s)
+                // still work even after having tapped the Backspace/Delete key.
+                set_mods(mod_state);
+                return false;
+            }
+        } else { // on release of KC_BSPC
+            // In case KC_DEL is still being sent even after the release of KC_BSPC
+            if (delkey_registered) {
+                unregister_code(DM_REC1);
+                delkey_registered = false;
+                return false;
+            }
+        }
+        // Let QMK process the KC_BSPC keycode as usual outside of shift
+        return true;
+        }
+        */
+
 
 
         // X C V
@@ -365,6 +403,70 @@ void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         }
     }
     */
+
+    // Keypad leds
+    if (layer_state_is(N_FN)) {
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(20, 0, 255 ,255); // KC_5
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(22, 0, 255 ,255); // KC_7
+        RGB_MATRIX_INDICATOR_SET_COLOR(23, 0, 255 ,255); // KC_8
+        RGB_MATRIX_INDICATOR_SET_COLOR(24, 0, 255 ,255); // KC_9
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(26, 0, 255 ,255); // KC_MINS
+        RGB_MATRIX_INDICATOR_SET_COLOR(27, 0, 255 ,255); // KC_EQL
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(37, 0, 255 ,255); // KC_4
+        RGB_MATRIX_INDICATOR_SET_COLOR(38, 0, 255 ,255); // KC_5
+        RGB_MATRIX_INDICATOR_SET_COLOR(39, 0, 255 ,255); // KC_6
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(40, 0, 255, 255); // KC_PPLS
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(52, 0, 255 ,255); // KC_3
+        RGB_MATRIX_INDICATOR_SET_COLOR(53, 0, 255 ,255); // KC_2
+        RGB_MATRIX_INDICATOR_SET_COLOR(54, 0, 255 ,255); // KC_1
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(67, 0, 255 ,255); // KC_0
+        RGB_MATRIX_INDICATOR_SET_COLOR(68, 0, 255 ,255); // KC_DOT
+        RGB_MATRIX_INDICATOR_SET_COLOR(69, 0, 255 ,255); // KC_SLASH
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(71, 0, 255 ,255); // KC_UP
+        RGB_MATRIX_INDICATOR_SET_COLOR(79, 0, 255 ,255); // KC_LEFT
+        RGB_MATRIX_INDICATOR_SET_COLOR(80, 0, 255, 255); // KC_DOWN
+        RGB_MATRIX_INDICATOR_SET_COLOR(81, 0, 255, 255); // KC_RGHT
+
+    } else {
+        RGB_MATRIX_INDICATOR_SET_COLOR(20, 0, 0, 0); // KC_5
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(22, 0, 0, 0); // KC_7
+        RGB_MATRIX_INDICATOR_SET_COLOR(23, 0, 0, 0); // KC_8
+        RGB_MATRIX_INDICATOR_SET_COLOR(24, 0, 0, 0); // KC_9
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(26, 0, 0, 0); // KC_MINS
+        RGB_MATRIX_INDICATOR_SET_COLOR(27, 0, 0, 0); // KC_EQL
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(37, 0, 0, 0); // KC_4
+        RGB_MATRIX_INDICATOR_SET_COLOR(38, 0, 0, 0); // KC_5
+        RGB_MATRIX_INDICATOR_SET_COLOR(39, 0, 0, 0); // KC_6
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(40, 0, 0, 0); // KC_PPLS
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(52, 0, 0, 0); // KC_3
+        RGB_MATRIX_INDICATOR_SET_COLOR(53, 0, 0, 0); // KC_2
+        RGB_MATRIX_INDICATOR_SET_COLOR(54, 0, 0, 0); // KC_1
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(67, 0, 0, 0); // KC_0
+        RGB_MATRIX_INDICATOR_SET_COLOR(68, 0, 0, 0); // KC_DOT
+        RGB_MATRIX_INDICATOR_SET_COLOR(69, 0, 0, 0); // KC_9
+
+        RGB_MATRIX_INDICATOR_SET_COLOR(71, 0, 0, 0); // KC_UP
+        RGB_MATRIX_INDICATOR_SET_COLOR(79, 0, 0, 0); // KC_LEFT
+        RGB_MATRIX_INDICATOR_SET_COLOR(80, 0, 0, 0); // KC_DOWN
+        RGB_MATRIX_INDICATOR_SET_COLOR(81, 0, 0, 0); // KC_RGHT
+    }
+
+
+
 
     if (layer_state_is(S_FN)) {
         RGB_MATRIX_INDICATOR_SET_COLOR(0, 255, 0, 0); // KC_ESC
